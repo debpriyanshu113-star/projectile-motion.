@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#06151c" />
+  <title>Projectile &amp; Parabolic Motion</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell" aria-label="Projectile motion simulator">
+    <header class="topbar">
+      <div class="nav-group"><button id="homeBtn" class="icon-button home" aria-label="Reset module to defaults" title="Reset module">⌂</button><button class="nav-button" disabled aria-label="Previous module unavailable">← <span>Previous</span></button></div>
+      <h1>7 - Projectile &amp; Parabolic Motion</h1>
+      <button class="nav-button" disabled aria-label="Next module unavailable"><span>Next</span> →</button>
+    </header>
+    <section class="dashboard">
+      <section class="simulation-panel" aria-label="Trajectory visualization">
+        <canvas id="scene" aria-label="Projectile trajectory canvas">Your browser does not support canvas.</canvas>
+        <section class="stats-card" aria-label="Live projectile statistics">
+          <div class="stat-title"><span>⌄</span> <strong>Physics readout</strong></div>
+          <dl id="stats"></dl>
+        </section>
+        <div class="canvas-key"><span><i class="line-key"></i> predicted path</span><span><i class="dot-key"></i> projectile</span></div>
+      </section>
+      <aside class="controls" aria-label="Simulation controls">
+        <section class="toolbar" aria-label="Playback and export controls">
+          <label class="speed-select">Speed <select id="playbackSpeed" aria-label="Playback speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+          <button id="stepBack" aria-label="Step backward 0.01 seconds" title="Step backward">−0.01</button>
+          <button id="playPause" aria-label="Launch simulation" title="Launch simulation">▶</button>
+          <button id="stepForward" aria-label="Step forward 0.01 seconds" title="Step forward">+0.01</button>
+          <button id="restart" aria-label="Restart simulation" title="Restart">↻</button>
+          <div class="toolbar-divider"></div>
+          <button id="saveConfig" aria-label="Save configuration as JSON" title="Save configuration">▣</button>
+          <button id="resetParams" aria-label="Reset all parameters" title="Reset parameters">♲</button>
+          <button id="exportCsv" aria-label="Export trajectory data as CSV" title="Export CSV">⇩</button>
+          <button id="infoBtn" aria-label="Open equations help" title="Physics equations">?</button>
+        </section>
+        <div class="control-scroll">
+          <section class="control-card">
+            <div class="control-header"><span class="round-icon">v₀</span><label for="speedRange">Launch speed</label><span class="unit">m/s</span></div>
+            <div class="control-row"><input id="speedRange" type="range" min="0" max="60" step="0.1" value="10" /><input id="speedInput" class="number-input" type="number" min="0" max="60" step="0.1" value="10" aria-label="Launch speed in metres per second" /></div>
+            <div class="range-labels"><span>0</span><span>60</span></div>
+          </section>
+          <section class="control-card">
+            <div class="control-header"><span class="round-icon">θ</span><label for="angleRange">Launch angle</label><span class="unit">°</span></div>
+            <div class="control-row"><input id="angleRange" type="range" min="0" max="180" step="1" value="45" /><input id="angleInput" class="number-input" type="number" min="0" max="180" step="1" value="45" aria-label="Launch angle in degrees" /></div>
+            <div class="range-labels"><span>0</span><span>180</span></div>
+          </section>
+          <section class="control-card">
+            <div class="control-header"><span class="round-icon">h₀</span><label for="heightRange">Start height</label><span class="unit">m</span></div>
+            <div class="control-row"><input id="heightRange" type="range" min="0" max="50" step="0.1" value="0" /><input id="heightInput" class="number-input" type="number" min="0" max="50" step="0.1" value="0" aria-label="Start height in metres" /></div>
+            <div class="range-labels"><span>0</span><span>50</span></div>
+          </section>
+          <section class="control-card">
+            <div class="control-header"><span class="round-icon">g</span><label for="gravityRange">Gravity</label><span class="unit">m/s²</span></div>
+            <div class="control-row"><input id="gravityRange" type="range" min="1" max="25" step="0.01" value="9.81" /><input id="gravityInput" class="number-input" type="number" min="1" max="25" step="0.01" value="9.81" aria-label="Gravity in metres per second squared" /></div>
+            <div class="range-labels"><span>1</span><button id="earthBtn" class="earth-button">Earth 9.81</button><span>25</span></div>
+          </section>
+          <section class="control-card drag-card">
+            <div class="control-header"><span class="round-icon">≋</span><label for="dragToggle">Air resistance</label><label class="switch"><input id="dragToggle" type="checkbox" /><span></span></label></div>
+            <p>Quadratic drag, air density 1.225 kg/m³</p>
+            <div id="dragControls" hidden><div class="mini-label"><label for="dragRange">Drag coefficient</label><output id="dragOutput">0.47</output></div><input id="dragRange" type="range" min="0.05" max="1.5" step="0.01" value="0.47" /><div class="mini-label"><label for="massRange">Mass (kg)</label><output id="massOutput">1.00</output></div><input id="massRange" type="range" min="0.1" max="10" step="0.1" value="1" /></div>
+          </section>
+          <section class="control-card options-card">
+            <div class="control-header"><span class="round-icon">◌</span><span>Display options</span></div>
+            <div class="option-grid">
+              <label><input data-option="trajectory" type="checkbox" checked /> Path</label><label><input data-option="vectors" type="checkbox" checked /> Vectors</label>
+              <label><input data-option="apex" type="checkbox" checked /> Apex</label><label><input data-option="landing" type="checkbox" checked /> Landing</label>
+              <label><input data-option="grid" type="checkbox" checked /> Grid</label><label><input data-option="axes" type="checkbox" checked /> Axes</label>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </section>
+  </main>
+  <dialog id="infoDialog"><button class="dialog-close" aria-label="Close equations panel">×</button><h2>Projectile model</h2><p>Without air resistance: <code>x = v₀ cos(θ)t</code> and <code>y = h₀ + v₀ sin(θ)t − ½gt²</code>.</p><p>With air resistance, the simulation uses small stable integration steps with quadratic drag opposing velocity: <code>Fᵈ = ½ρCᵈA|v|v</code>. The displayed predictions are calculated from those sampled positions.</p><p>Values use SI units. The maximum height is measured from ground level.</p></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
